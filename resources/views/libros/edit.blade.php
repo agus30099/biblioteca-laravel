@@ -20,7 +20,14 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Autor:</label>
-                                <input type="text" name="autor" class="form-control" value="{{ $libro->autor }}" required>
+                                <select name="autor_id" class="form-select" required>
+                                    <option value="">Seleccione un autor...</option>
+                                    @foreach($autores as $autor)
+                                        <option value="{{ $autor->id }}" {{ $libro->autor_id == $autor->id ? 'selected' : '' }}>
+                                            {{ $autor->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                         <div class="row">

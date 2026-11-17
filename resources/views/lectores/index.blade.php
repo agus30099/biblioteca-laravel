@@ -5,9 +5,11 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Lista de Lectores</h2>
-        <a href="{{ route('lectores.create') }}" class="btn btn-success">
-            <i class="bi bi-person-plus"></i> Nuevo Lector
-        </a>
+        @if(auth()->user()->role == 'admin')
+            <a href="{{ route('lectores.create') }}" class="btn btn-success">
+                <i class="bi bi-person-plus"></i> Nuevo Lector
+            </a>
+        @endif
     </div>
 
     <div class="card shadow-sm">
@@ -30,12 +32,16 @@
                             <td>{{ $lector->email }}</td>
                             <td>{{ $lector->telefono }}</td>
                             <td>
-                                <a href="{{ route('lectores.edit', $lector) }}" class="btn btn-warning btn-sm">Editar</a>
-                                <form action="{{ route('lectores.destroy', $lector) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar lector?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">Eliminar</button>
-                                </form>
+                                @if(auth()->user()->role == 'admin')
+                                    <a href="{{ route('lectores.edit', $lector) }}" class="btn btn-warning btn-sm">Editar</a>
+                                    <form action="{{ route('lectores.destroy', $lector) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar lector?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-danger btn-sm">Eliminar</button>
+                                    </form>
+                                @else
+                                    <span class="badge bg-secondary">Solo lectura</span>
+                                @endif
                             </td>
                         </tr>
                     @empty

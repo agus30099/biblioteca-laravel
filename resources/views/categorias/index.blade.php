@@ -5,9 +5,11 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Lista de Categorías</h2>
-        <a href="{{ route('categorias.create') }}" class="btn btn-success">
-            <i class="bi bi-plus-circle"></i> Nueva Categoría
-        </a>
+        @if(auth()->user()->role == 'admin')
+            <a href="{{ route('categorias.create') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Nueva Categoría
+            </a>
+        @endif
     </div>
 
     <div class="card shadow-sm">
@@ -28,13 +30,16 @@
                             <td>{{ $categoria->nombre }}</td>
                             <td>{{ $categoria->descripcion }}</td>
                             <td>
-                                <a href="{{ route('categorias.edit', $categoria) }}" class="btn btn-warning btn-sm">Editar</a>
-                                
-                                <form action="{{ route('categorias.destroy', $categoria) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">Eliminar</button>
-                                </form>
+                                @if(auth()->user()->role == 'admin')
+                                    <a href="{{ route('categorias.edit', $categoria) }}" class="btn btn-warning btn-sm">Editar</a>
+                                    <form action="{{ route('categorias.destroy', $categoria) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-danger btn-sm">Eliminar</button>
+                                    </form>
+                                @else
+                                    <span class="badge bg-secondary">Solo lectura</span>
+                                @endif
                             </td>
                         </tr>
                     @empty

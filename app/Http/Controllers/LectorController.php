@@ -23,7 +23,8 @@ class LectorController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
-            'email' => 'required|email|unique:lectores,email',
+            // ✅ CORREGIDO: Ahora dice 'lectors'
+            'email' => 'required|email|unique:lectors,email', 
             'telefono' => 'nullable|string|max:20'
         ]);
 
@@ -42,7 +43,8 @@ class LectorController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
-            'email' => 'required|email|unique:lectores,email,' . $lectore->id,
+            // ✅ CORREGIDO: Ahora dice 'lectors'
+            'email' => 'required|email|unique:lectors,email,' . $lectore->id,
             'telefono' => 'nullable|string|max:20'
         ]);
 

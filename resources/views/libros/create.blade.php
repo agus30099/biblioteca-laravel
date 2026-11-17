@@ -10,7 +10,7 @@
                     <h4>Registrar Nuevo Libro</h4>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('libros.store') }}" method="POST">
+                    <form id="formLibro" action="{{ route('libros.store') }}" method="POST">
                         @csrf
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -48,4 +48,13 @@
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('formLibro').addEventListener('submit', function(e) {
+            const isbn = document.querySelector('input[name="isbn"]').value;
+            if(isbn.length < 5) {
+                e.preventDefault();
+                alert('El ISBN debe tener al menos 5 caracteres.');
+            }
+        });
+    </script>
 @endsection
