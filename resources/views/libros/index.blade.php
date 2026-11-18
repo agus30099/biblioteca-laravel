@@ -4,6 +4,7 @@
 @section('title', 'Catálogo de Libros')
 
 @section('content')
+
 <style>
     .catalog-header {
         background: linear-gradient(135deg, #0D4032, #145A45);
@@ -58,6 +59,29 @@
     .book-title {
         font-weight: 700;
         color: #0D4032;
+    }
+
+    .book-cover {
+        width: 65px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 7px;
+        box-shadow: 0 3px 8px rgba(0,0,0,.18);
+        border: 1px solid #E8E0D2;
+        background: #F5F0E6;
+    }
+
+    .book-cover-placeholder {
+        width: 65px;
+        height: 90px;
+        background: #F5F0E6;
+        color: #145A45;
+        border-radius: 7px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 25px;
+        border: 1px solid #E8E0D2;
     }
 
     .stock-badge {
@@ -144,34 +168,50 @@
                 <li>{{ $error }}</li>
             @endforeach
         </ul>
+
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 @endif
 
 <div class="catalog-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+
     <div>
-        <h2><i class="bi bi-book-half me-2"></i>Catálogo de Libros</h2>
+        <h2>
+            <i class="bi bi-book-half me-2"></i>
+            Catálogo de Libros
+        </h2>
+
         <p>Explora y administra los libros disponibles en la biblioteca.</p>
     </div>
 
     <div class="d-flex flex-wrap gap-2">
+
         @auth
             @if(auth()->user()->role == 'admin')
-                <a href="{{ route('libros.export') }}" class="btn btn-outline-light catalog-btn">
-                    <i class="bi bi-file-earmark-excel me-1"></i> Exportar CSV
+
+                <a href="{{ route('libros.export') }}"
+                   class="btn btn-outline-light catalog-btn">
+                    <i class="bi bi-file-earmark-excel me-1"></i>
+                    Exportar CSV
                 </a>
 
-                <a href="{{ route('libros.create') }}" class="btn btn-gold catalog-btn">
-                    <i class="bi bi-plus-circle me-1"></i> Nuevo Libro
+                <a href="{{ route('libros.create') }}"
+                   class="btn btn-gold catalog-btn">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Nuevo Libro
                 </a>
+
             @endif
         @endauth
+
     </div>
 </div>
 
 <div class="card catalog-card mb-4">
     <div class="card-body">
+
         <form action="{{ route('libros.index') }}" method="GET" class="row g-2">
+
             <div class="col-md-10">
                 <input
                     type="text"
@@ -184,26 +224,36 @@
 
             <div class="col-md-2">
                 <button type="submit" class="btn btn-catalog catalog-btn w-100">
-                    <i class="bi bi-search me-1"></i> Buscar
+                    <i class="bi bi-search me-1"></i>
+                    Buscar
                 </button>
             </div>
+
         </form>
+
     </div>
 </div>
 
 <div class="card catalog-card">
     <div class="card-body">
+
         <div class="d-flex justify-content-between align-items-center mb-3">
+
             <h5 class="fw-bold mb-0" style="color:#0D4032;">
-                <i class="bi bi-collection me-2"></i>Libros registrados
+                <i class="bi bi-collection me-2"></i>
+                Libros registrados
             </h5>
+
         </div>
 
         <div class="table-responsive">
+
             <table class="table table-hover catalog-table align-middle mb-0">
+
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Portada</th>
                         <th>Título</th>
                         <th>Autor</th>
                         <th>ISBN</th>
@@ -214,15 +264,38 @@
                 </thead>
 
                 <tbody>
-                    @forelse($libros as $libro)
-                        <tr>
-                            <td class="text-muted">#{{ $libro->id }}</td>
 
-                            <td>
-                                <span class="book-title">{{ $libro->titulo }}</span>
+                    @forelse($libros as $libro)
+
+                        <tr>
+
+                            <td class="text-muted">
+                                #{{ $libro->id }}
                             </td>
 
-                            <td>{{ $libro->autor->nombre ?? 'Sin autor' }}</td>
+                            <td>
+                                <img
+                                    src="https://covers.openlibrary.org/b/isbn/{{ str_replace('-', '', $libro->isbn) }}-M.jpg"
+                                    class="book-cover"
+                                    alt="Portada de {{ $libro->titulo }}"
+                                    loading="lazy"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                >
+
+                                <div class="book-cover-placeholder">
+                                    <i class="bi bi-book"></i>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="book-title">
+                                    {{ $libro->titulo }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ $libro->autor->nombre ?? 'Sin autor' }}
+                            </td>
 
                             <td>
                                 <small>{{ $libro->isbn }}</small>
@@ -235,23 +308,29 @@
                             </td>
 
                             <td>
-                                {{ $libro->categoria->nombre }}
+                                {{ $libro->categoria->nombre ?? 'Sin categoría' }}
                             </td>
 
                             <td class="catalog-actions">
+
                                 @auth
+
                                     @if(auth()->user()->role == 'admin')
+
                                         <a href="{{ route('libros.edit', $libro) }}"
                                            class="btn btn-sm btn-outline-gold"
                                            title="Editar libro">
+
                                             <i class="bi bi-pencil-square"></i>
                                             Editar
+
                                         </a>
 
                                         <form action="{{ route('libros.destroy', $libro) }}"
                                               method="POST"
                                               class="d-inline"
                                               onsubmit="return confirm('¿Eliminar libro?')">
+
                                             @csrf
                                             @method('DELETE')
 
@@ -259,58 +338,108 @@
                                                 <i class="bi bi-trash"></i>
                                                 Eliminar
                                             </button>
+
                                         </form>
+
                                     @else
+
                                         @if($libro->stock == 0)
-                                            <form action="{{ route('reservas.store') }}" method="POST" class="d-inline">
+
+                                            <form action="{{ route('reservas.store') }}"
+                                                  method="POST"
+                                                  class="d-inline">
+
                                                 @csrf
-                                                <input type="hidden" name="libro_id" value="{{ $libro->id }}">
+
+                                                <input type="hidden"
+                                                       name="libro_id"
+                                                       value="{{ $libro->id }}">
 
                                                 <button type="submit"
                                                         class="btn btn-sm btn-gold"
                                                         onclick="return confirm('¿Reservar este libro?')">
+
                                                     <i class="bi bi-bookmark-plus"></i>
                                                     Reservar
+
                                                 </button>
+
                                             </form>
+
                                         @else
-                                            <form action="{{ route('prestamos.store') }}" method="POST" class="d-inline">
+
+                                            <form action="{{ route('prestamos.store') }}"
+                                                  method="POST"
+                                                  class="d-inline">
+
                                                 @csrf
-                                                <input type="hidden" name="libro_id" value="{{ $libro->id }}">
-                                                <input type="hidden" name="fecha_prestamo" value="{{ date('Y-m-d') }}">
+
+                                                <input type="hidden"
+                                                       name="libro_id"
+                                                       value="{{ $libro->id }}">
+
+                                                <input type="hidden"
+                                                       name="fecha_prestamo"
+                                                       value="{{ date('Y-m-d') }}">
 
                                                 <button type="submit"
                                                         class="btn btn-sm btn-catalog"
                                                         onclick="return confirm('¿Solicitar este libro al bibliotecario?')">
+
                                                     <i class="bi bi-hand-index"></i>
                                                     Solicitar
+
                                                 </button>
+
                                             </form>
+
                                         @endif
+
                                     @endif
+
                                 @else
-                                    <a href="{{ route('login') }}" class="btn btn-sm btn-outline-gold">
+
+                                    <a href="{{ route('login') }}"
+                                       class="btn btn-sm btn-outline-gold">
+
                                         <i class="bi bi-box-arrow-in-right"></i>
                                         Inicia sesión
+
                                     </a>
+
                                 @endauth
+
                             </td>
+
                         </tr>
+
                     @empty
+
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
+                            <td colspan="8" class="text-center py-5 text-muted">
+
                                 <i class="bi bi-book fs-1 d-block mb-2"></i>
+
                                 No hay libros registrados o no coinciden con la búsqueda.
+
                             </td>
                         </tr>
+
                     @endforelse
+
                 </tbody>
+
             </table>
+
         </div>
 
         <div class="d-flex justify-content-center mt-4">
+
             {{ $libros->appends(['buscar' => $buscar])->links('pagination::bootstrap-5') }}
+
         </div>
+
     </div>
 </div>
+
 @endsection
