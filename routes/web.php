@@ -79,6 +79,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/prestamos/{prestamo}/renovar', [PrestamoController::class, 'renovar'])->name('prestamos.renovar');
     Route::post('/prestamos/{prestamo}/aprobar', [PrestamoController::class, 'aprobar'])->name('prestamos.aprobar');
     Route::post('/prestamos/{prestamo}/rechazar', [PrestamoController::class, 'rechazar'])->name('prestamos.rechazar');
+    Route::get('/prestamos/{prestamo}/comprobante', [PrestamoController::class, 'generarComprobante'])->name('prestamos.comprobante');
+    Route::get('/prestamos/reporte/pdf', [PrestamoController::class, 'reportePdf'])->name('prestamos.reporte');
     
     // ✅ AQUÍ ESTABA EL ERROR: Faltaba el punto y coma al final
     Route::post('/prestamos/{prestamo}/entregar', [PrestamoController::class, 'entregar'])->name('prestamos.entregar');

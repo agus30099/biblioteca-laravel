@@ -6,6 +6,7 @@ use App\Models\Prestamo;
 use App\Models\Libro;
 use App\Models\Lector;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PrestamoController extends Controller
 {
@@ -202,5 +203,26 @@ class PrestamoController extends Controller
             return back()->with('success', 'Libro entregado. El préstamo ha comenzado.');
         }
         return back();
+    }
+    public function generarComprobante(Prestamo $prestamo)
+    {
+        // Solo el admin o el dueño del préstamo pueden imprimirlo
+        if (auth()->user()->role !== 'admin' && $prestamo->lector->email !== auth()->user()->email) {
+            abort(403);
+        }
+
+        $pdf = Pdf::loadView('pdf.comprobante', compact('prestamo'));
+        return $pdf->download('Comprobante_Prestamo_' . $prestamo->id . '.pdf');
+    }
+
+        public function reportePdf()
+    {
+        if (auth()->user()->role !== 'admin') abort(403);
+
+        $prestamos = Prestamo::where('estado', 'Prestado')->with(['libro', 'lector'])->get();
+        
+        $pdf = Pdf::loadView('pdf.reporte-prestamos', compact('prestamos'));
+        // Opcional: $pdf->setPaper('a4', 'landscape'); // Horizontal para que quepan más columnas
+        return $pdf->download('Reporte_Prestamos_' . date('Y-m-d') . '.pdf');
     }
 }
