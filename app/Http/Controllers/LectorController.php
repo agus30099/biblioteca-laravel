@@ -8,10 +8,28 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class LectorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $lectores = Lector::latest()->get();
-        return view('lectores.index', compact('lectores'));
+        $buscar = $request->get('buscar');
+
+        $lectores = Lector::when($buscar, function ($query, $buscar) {
+            return $query->where('nombre', 'like', "%$buscar%")
+                         ->orWhere('apellido', 'like', "%$buscar%")
+                         ->orWhere('email', 'like', "%$buscar%");
+        })->latest()->paginate(10);
+
+        return view('lectores.index', compact('lectores', 'buscar'));
+    }
+
+    public function pagarMulta(Lector $lectore)
+    {
+        // Buscamos todas las multas pendientes de este lector y las marcamos como pagadas
+        $lectore->prestamos()
+            ->where('multa', '>', 0)
+            ->where('multa_pagada', false)
+            ->update(['multa_pagada' => true]);
+
+        return back()->with('success', 'Las multas del lector han sido saldadas correctamente.');
     }
 
     public function create()

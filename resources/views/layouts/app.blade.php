@@ -180,59 +180,34 @@
             <div class="collapse navbar-collapse" id="navbarNav">
 
                 <ul class="navbar-nav me-auto">
-
                     @auth
-                        @if(auth()->user()->isStaff())
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('dashboard') }}">
-                                    <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                                </a>
-                            </li>
+                        @if(auth()->user()->role == 'admin')
+                            <!-- Menú Exclusivo de Admin -->
+                            <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('categorias.index') }}">Categorías</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('autores.index') }}">Autores</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('libros.index') }}">Libros</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('lectores.index') }}">Lectores</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('prestamos.index') }}">Préstamos</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('reservas.index') }}">Reservas</a></li>
 
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('categorias.index') }}">
-                                    <i class="bi bi-tags me-1"></i> Categorías
-                                </a>
-                            </li>
+                        @elseif(auth()->user()->role == 'bibliotecario')
+                            <!-- Menú del Bibliotecario (Operativo) -->
+                            <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Inicio</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('libros.index') }}">Inventario</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('lectores.index') }}">Lectores</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('prestamos.index') }}">Mostrador</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('reservas.index') }}">Lista de Espera</a></li>
 
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('autores.index') }}">
-                                    <i class="bi bi-pen me-1"></i> Autores
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('lectores.index') }}">
-                                    <i class="bi bi-people me-1"></i> Lectores
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('prestamos.index') }}">
-                                    <i class="bi bi-journal-check me-1"></i> Préstamos
-                                </a>
-                            </li>
                         @else
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('reservas.index') }}">
-                                    <i class="bi bi-bookmark me-1"></i> Mis Reservas
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('prestamos.index') }}">
-                                    <i class="bi bi-journal-bookmark me-1"></i> Mis Préstamos
-                                </a>
-                            </li>
+                            <!-- Menú del Lector -->
+                            <li class="nav-item"><a class="nav-link" href="{{ route('reservas.index') }}">Mis Reservas</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ route('prestamos.index') }}">Mis Préstamos</a></li>
                         @endif
                     @endauth
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('libros.index') }}">
-                            <i class="bi bi-book me-1"></i> Catálogo Público
-                        </a>
-                    </li>
-
+                    <!-- ✅ CORREGIDO: El Catálogo Público ahora aparece SIEMPRE -->
+                    <li class="nav-item"><a class="nav-link" href="{{ route('libros.index') }}">Catálogo Público</a></li>
                 </ul>
 
                 <ul class="navbar-nav align-items-lg-center">

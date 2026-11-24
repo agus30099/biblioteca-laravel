@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/lectores/{lectore}', [LectorController::class, 'update'])->name('lectores.update');
     Route::delete('/lectores/{lectore}', [LectorController::class, 'destroy'])->name('lectores.destroy');
     Route::get('/lectores/{lectore}/credencial', [LectorController::class, 'credencial'])->name('lectores.credencial');
+    Route::post('/lectores/{lectore}/pagar-multa', [App\Http\Controllers\LectorController::class, 'pagarMulta'])->name('lectores.pagarMulta');
 
     // --- Préstamos ---
     Route::get('/prestamos', [PrestamoController::class, 'index'])->name('prestamos.index');

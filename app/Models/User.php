@@ -57,9 +57,15 @@ class User extends Authenticatable
         return $this->role === 'bibliotecario';
     }
 
-    // Este método nos servirá para saber si es admin o bibliotecario
+    // El staff es el admin o el bibliotecario
     public function isStaff(): bool
     {
         return in_array($this->role, ['admin', 'bibliotecario']);
+    }
+
+    // Para los lectores (si en la BD dicen 'usuario' o 'lector')
+    public function isLector(): bool
+    {
+        return in_array($this->role, ['lector', 'usuario']);
     }
 }

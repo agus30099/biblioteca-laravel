@@ -335,10 +335,13 @@
                                             @csrf
                                             @method('DELETE')
 
+                                            @if(auth()->user()->role == 'admin')
                                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                                 <i class="bi bi-trash"></i>
                                                 Eliminar
                                             </button>
+                                            @endif
+
 
                                         </form>
 

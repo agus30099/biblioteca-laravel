@@ -77,8 +77,10 @@ class LibroController extends Controller
 
     public function destroy(Libro $libro)
     {
-        // Seguridad: Solo admin
-        if (auth()->user()->role !== 'admin') abort(403, 'Acceso denegado.');
+        // ✅ SOLO el admin puede eliminar libros
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Acceso denegado. Solo el administrador puede eliminar libros.');
+        }
 
         $libro->delete();
         return redirect()->route('libros.index')->with('success', 'Libro eliminado.');

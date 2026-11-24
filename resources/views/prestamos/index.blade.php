@@ -99,6 +99,33 @@
         @endif
     </div>
 
+        <!-- Barra de Filtros -->
+    <div class="card shadow-sm mb-4" style="border-radius: 16px; border: 1px solid #e5dccd;">
+        <div class="card-body py-3 d-flex flex-wrap gap-2 align-items-center">
+            <span class="fw-bold me-2" style="color: #0D4032;"><i class="bi bi-funnel"></i> Filtrar:</span>
+            
+            <a href="{{ route('prestamos.index') }}" class="btn btn-sm {{ empty($estado) ? 'btn-new-loan' : 'btn-outline-secondary' }}" style="border-radius: 20px;">
+                Todos
+            </a>
+            
+            <a href="{{ route('prestamos.index', ['estado' => 'Solicitado']) }}" class="btn btn-sm {{ ($estado ?? '') == 'Solicitado' ? 'btn-warning text-dark' : 'btn-outline-warning text-dark' }}" style="border-radius: 20px;">
+                Solicitados
+            </a>
+            
+            <a href="{{ route('prestamos.index', ['estado' => 'Aprobado']) }}" class="btn btn-sm {{ ($estado ?? '') == 'Aprobado' ? 'btn-info text-white' : 'btn-outline-info' }}" style="border-radius: 20px;">
+                Aprobados (Por entregar)
+            </a>
+
+            <a href="{{ route('prestamos.index', ['estado' => 'Prestado']) }}" class="btn btn-sm {{ ($estado ?? '') == 'Prestado' ? 'btn-primary' : 'btn-outline-primary' }}" style="border-radius: 20px;">
+                En curso
+            </a>
+
+            <a href="{{ route('prestamos.index', ['estado' => 'Devuelto']) }}" class="btn btn-sm {{ ($estado ?? '') == 'Devuelto' ? 'btn-success' : 'btn-outline-success' }}" style="border-radius: 20px;">
+                Devueltos
+            </a>
+        </div>
+    </div>
+
     <div class="loans-card">
         <div class="loans-card-header">
             <h5><i class="bi bi-clock-history me-2"></i> Registro de préstamos</h5>

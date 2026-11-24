@@ -11,4 +11,12 @@
         {
             return $this->hasMany(Prestamo::class);
         }
+
+        public function tieneAdeudo(): bool
+        {
+            return $this->prestamos()
+                ->where('multa', '>', 0)
+                ->where('multa_pagada', false)
+                ->exists();
+        }
     }
