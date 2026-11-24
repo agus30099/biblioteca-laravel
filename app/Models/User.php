@@ -46,4 +46,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isBibliotecario(): bool
+    {
+        return $this->role === 'bibliotecario';
+    }
+
+    // Este método nos servirá para saber si es admin o bibliotecario
+    public function isStaff(): bool
+    {
+        return in_array($this->role, ['admin', 'bibliotecario']);
+    }
 }

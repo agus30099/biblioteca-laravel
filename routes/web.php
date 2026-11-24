@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/lectores/{lectore}/editar', [LectorController::class, 'edit'])->name('lectores.edit');
     Route::put('/lectores/{lectore}', [LectorController::class, 'update'])->name('lectores.update');
     Route::delete('/lectores/{lectore}', [LectorController::class, 'destroy'])->name('lectores.destroy');
+    Route::get('/lectores/{lectore}/credencial', [LectorController::class, 'credencial'])->name('lectores.credencial');
 
     // --- Préstamos ---
     Route::get('/prestamos', [PrestamoController::class, 'index'])->name('prestamos.index');
@@ -81,6 +82,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/prestamos/{prestamo}/rechazar', [PrestamoController::class, 'rechazar'])->name('prestamos.rechazar');
     Route::get('/prestamos/{prestamo}/comprobante', [PrestamoController::class, 'generarComprobante'])->name('prestamos.comprobante');
     Route::get('/prestamos/reporte/pdf', [PrestamoController::class, 'reportePdf'])->name('prestamos.reporte');
+    Route::get('/prestamos/reporte/vencidos', [PrestamoController::class, 'reporteVencidos'])->name('prestamos.reporte.vencidos');
     
     // ✅ AQUÍ ESTABA EL ERROR: Faltaba el punto y coma al final
     Route::post('/prestamos/{prestamo}/entregar', [PrestamoController::class, 'entregar'])->name('prestamos.entregar');

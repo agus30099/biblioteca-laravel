@@ -10,10 +10,11 @@ class ReservaController extends Controller
 {
     public function index()
     {
-        // Si es admin, ve todas las reservas. Si es lector, solo las suyas.
-        if (auth()->user()->role == 'admin') {
+        // Si eres admin, ves TODAS las reservas
+        if (auth()->user()->role == 'admin' || auth()->user()->role == 'bibliotecario') {
             $reservas = Reserva::with(['libro', 'lector'])->latest()->get();
         } else {
+            // Si eres lector, solo ves las TUYAS (buscando por tu correo)
             $reservas = Reserva::with(['libro', 'lector'])
                 ->whereHas('lector', function($query) {
                     $query->where('email', auth()->user()->email);

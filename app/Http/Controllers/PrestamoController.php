@@ -225,4 +225,19 @@ class PrestamoController extends Controller
         // Opcional: $pdf->setPaper('a4', 'landscape'); // Horizontal para que quepan más columnas
         return $pdf->download('Reporte_Prestamos_' . date('Y-m-d') . '.pdf');
     }
+
+    public function reporteVencidos()
+    {
+        if (auth()->user()->role !== 'admin') abort(403);
+
+        $hoy = date('Y-m-d');
+        // Buscar solo los préstamos que no se han devuelto y su fecha límite ya pasó
+        $vencidos = Prestamo::where('estado', 'Prestado')
+            ->where('fecha_limite', '<', $hoy)
+            ->with(['libro', 'lector'])
+            ->get();
+
+        $pdf = Pdf::loadView('pdf.reporte-vencidos', compact('vencidos', 'hoy'));
+        return $pdf->download('Reporte_Morosos_' . $hoy . '.pdf');
+    }
 }

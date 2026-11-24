@@ -267,7 +267,7 @@
             <p>Consulta y administra los autores de la biblioteca.</p>
         </div>
 
-        @if(auth()->user()->role == 'admin')
+        @if(auth()->user()->isStaff())
             <a href="{{ route('autores.create') }}"
                class="btn btn-new-author">
                 <i class="bi bi-person-plus me-2"></i>
@@ -354,7 +354,7 @@
                                 </td>
 
                                 <td>
-                                    @if(auth()->user()->role == 'admin')
+                                    @if(auth()->user()->isStaff())
 
                                         <div class="d-flex gap-2">
 

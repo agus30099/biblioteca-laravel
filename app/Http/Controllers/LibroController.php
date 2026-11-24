@@ -84,16 +84,21 @@ class LibroController extends Controller
         return redirect()->route('libros.index')->with('success', 'Libro eliminado.');
     }
 
-    public function exportCsv()
+    public function exportCsv(Request $request)
     {
-        // Seguridad: Solo admin
-        if (auth()->user()->role !== 'admin') abort(403, 'Acceso denegado.');
+        $buscar = $request->get('buscar');
 
-        $libros = Libro::with(['categoria', 'autor'])->get();
-        $filename = "libros_" . date('Y-m-d') . ".csv";
+        // Exportar solo lo que se está buscando (si hay filtro)
+        $libros = Libro::with(['categoria', 'autor'])
+            ->when($buscar, function ($query, $buscar) {
+                return $query->where('titulo', 'like', "%$buscar%")
+                             ->orWhere('isbn', 'like', "%$buscar%");
+            })->get();
+
+        $filename = "Catalogo_Libros_" . date('Y-m-d') . ".csv";
 
         $headers = [
-            "Content-type"        => "text/csv",
+            "Content-type"        => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=$filename",
             "Pragma"              => "no-cache",
             "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
@@ -102,7 +107,12 @@ class LibroController extends Controller
 
         $callback = function() use($libros) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['ID', 'Título', 'Autor', 'ISBN', 'Stock', 'Categoría']);
+
+            // ✅ 1. MAGIA SENIOR: Agregar BOM UTF-8 para que Excel lea acentos y eñes
+            fwrite($file, "\xEF\xBB\xBF");
+
+            // ✅ 2. Usar punto y coma (;) en lugar de coma para Excel en español
+            fputcsv($file, ['ID', 'Título', 'Autor', 'ISBN', 'Stock', 'Categoría'], ';');
 
             foreach ($libros as $libro) {
                 fputcsv($file, [
@@ -112,7 +122,7 @@ class LibroController extends Controller
                     $libro->isbn,
                     $libro->stock,
                     $libro->categoria->nombre
-                ]);
+                ], ';');
             }
             fclose($file);
         };

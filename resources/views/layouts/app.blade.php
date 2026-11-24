@@ -182,7 +182,7 @@
                 <ul class="navbar-nav me-auto">
 
                     @auth
-                        @if(auth()->user()->role == 'admin')
+                        @if(auth()->user()->isStaff())
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('dashboard') }}">
                                     <i class="bi bi-speedometer2 me-1"></i> Dashboard

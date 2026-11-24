@@ -13,9 +13,12 @@
     .btn-new-loan { background: #145A45; color: #FFFFFF; border: 1px solid #D4A64A; padding: 11px 20px; border-radius: 10px; font-weight: 600; transition: .2s; }
     .btn-new-loan:hover { background: #0D4032; color: #FFFFFF; transform: translateY(-2px); }
 
-    /* Estilo para el botón de reporte para que combine con el diseño */
-    .btn-pdf-report { background: #FFFFFF; color: #a33d2d; border: 1px solid #a33d2d; padding: 11px 20px; border-radius: 10px; font-weight: 600; transition: .2s; text-decoration: none; display: inline-block;}
+    .btn-pdf-report { background: #FFFFFF; color: #a33d2d; border: 1px solid #a33d2d; padding: 11px 20px; border-radius: 10px; font-weight: 600; transition: .2s; text-decoration: none; display: inline-block; }
     .btn-pdf-report:hover { background: #a33d2d; color: #FFFFFF; transform: translateY(-2px); }
+
+    /* Estilo para el nuevo botón de vencidos */
+    .btn-overdue-report { background: #FFFFFF; color: #dc3545; border: 1px solid #dc3545; padding: 11px 20px; border-radius: 10px; font-weight: 600; transition: .2s; text-decoration: none; display: inline-block; }
+    .btn-overdue-report:hover { background: #dc3545; color: #FFFFFF; transform: translateY(-2px); }
 
     .loans-card { background: #FFFFFF; border: 1px solid #e5dccd; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(73,55,41,.08); }
     .loans-card-header { background: #0D4032; color: #FFFFFF; padding: 19px 22px; border-bottom: 3px solid #D4A64A; }
@@ -69,21 +72,26 @@
         <div>
             <h2>
                 <i class="bi bi-journal-check me-2"></i>
-                {{ auth()->user()->role == 'admin' ? 'Historial de Préstamos' : 'Mis Préstamos' }}
+                {{ auth()->user()->isStaff() ? 'Historial de Préstamos' : 'Mis Préstamos' }}
             </h2>
             <p>
-                {{ auth()->user()->role == 'admin'
+                {{ auth()->user()->isStaff()
                     ? 'Administra las solicitudes, entregas y devoluciones.'
                     : 'Consulta el estado de tus préstamos y fechas de devolución.' }}
             </p>
         </div>
 
-        <!-- ✅ CORRECCIÓN: Botones globales en el encabezado -->
-        @if(auth()->user()->role == 'admin')
-            <div class="d-flex gap-2">
+        <!-- ✅ CORRECCIÓN: Botones globales bien ubicados -->
+        @if(auth()->user()->isStaff())
+            <div class="d-flex gap-2 flex-wrap">
                 <a href="{{ route('prestamos.reporte') }}" class="btn-pdf-report">
                     <i class="bi bi-file-earmark-pdf me-1"></i> Reporte PDF
                 </a>
+                
+                <a href="{{ route('prestamos.reporte.vencidos') }}" class="btn-overdue-report">
+                    <i class="bi bi-exclamation-triangle me-1"></i> Vencidos
+                </a>
+
                 <a href="{{ route('prestamos.create') }}" class="btn btn-new-loan">
                     <i class="bi bi-plus-circle me-2"></i> Nuevo Préstamo
                 </a>
@@ -103,7 +111,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Libro</th>
-                            @if(auth()->user()->role == 'admin')
+                            @if(auth()->user()->isStaff())
                                 <th>Lector</th>
                             @endif
                             <th>F. Préstamo</th>
@@ -111,7 +119,7 @@
                             <th>F. Devolución</th>
                             <th>Multa</th>
                             <th>Estado</th>
-                            @if(auth()->user()->role == 'admin')
+                            @if(auth()->user()->isStaff())
                                 <th class="text-center">Acciones</th>
                             @endif
                         </tr>
@@ -125,7 +133,7 @@
                                         <i class="bi bi-book me-1"></i> {{ $prestamo->libro->titulo }}
                                     </span>
                                 </td>
-                                @if(auth()->user()->role == 'admin')
+                                @if(auth()->user()->isStaff())
                                     <td>
                                         <span class="loan-reader">
                                             <i class="bi bi-person-circle me-1"></i>
@@ -185,7 +193,7 @@
                                     @endif
                                 </td>
 
-                                @if(auth()->user()->role == 'admin')
+                                @if(auth()->user()->isStaff())
                                     <td class="text-center">
                                         <div class="dropdown">
                                             <button class="btn btn-sm btn-outline-success loan-actions dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -216,18 +224,15 @@
                                                         <form action="{{ route('prestamos.entregar', $prestamo) }}" method="POST">
                                                             @csrf
                                                             <button type="submit" class="dropdown-item text-success" onclick="return confirm('¿El lector ya recogió el libro?')">
-                                                                <i class="bi bi-box-arrow-up me-2"></i> Confirmar Entrega Física
+                                                                <i class="bi bi-box-arrow-up me-2"></i> Confirmar Entrega
                                                             </button>
                                                         </form>
                                                     </li>
-                                                    
-                                                    <!-- ✅ CORRECCIÓN: El comprobante también se puede imprimir aquí -->
                                                     <li>
                                                         <a class="dropdown-item" href="{{ route('prestamos.comprobante', $prestamo) }}">
                                                             <i class="bi bi-printer text-secondary me-2"></i> Imprimir Comprobante
                                                         </a>
                                                     </li>
-
                                                     <li>
                                                         <form action="{{ route('prestamos.rechazar', $prestamo) }}" method="POST">
                                                             @csrf
@@ -252,7 +257,6 @@
                                                             </button>
                                                         </form>
                                                     </li>
-                                                    <!-- ✅ CORRECCIÓN: El comprobante también se puede imprimir aquí -->
                                                     <li>
                                                         <a class="dropdown-item" href="{{ route('prestamos.comprobante', $prestamo) }}">
                                                             <i class="bi bi-printer text-secondary me-2"></i> Imprimir Comprobante

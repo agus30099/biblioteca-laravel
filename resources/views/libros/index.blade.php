@@ -187,9 +187,10 @@
     <div class="d-flex flex-wrap gap-2">
 
         @auth
-            @if(auth()->user()->role == 'admin')
+            @if(auth()->user()->isStaff())
 
-                <a href="{{ route('libros.export') }}"
+                <!-- ✅ CORREGIDO: Solo un botón de exportar, y envía la búsqueda actual -->
+                <a href="{{ route('libros.export', ['buscar' => $buscar]) }}"
                    class="btn btn-outline-light catalog-btn">
                     <i class="bi bi-file-earmark-excel me-1"></i>
                     Exportar CSV
@@ -315,7 +316,7 @@
 
                                 @auth
 
-                                    @if(auth()->user()->role == 'admin')
+                                    @if(auth()->user()->isStaff())
 
                                         <a href="{{ route('libros.edit', $libro) }}"
                                            class="btn btn-sm btn-outline-gold"

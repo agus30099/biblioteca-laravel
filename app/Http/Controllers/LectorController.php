@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lector;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LectorController extends Controller
 {
@@ -57,5 +58,19 @@ class LectorController extends Controller
     {
         $lectore->delete();
         return redirect()->route('lectores.index')->with('success', 'Lector eliminado.');
+    }
+
+        public function credencial(Lector $lectore)
+    {
+        // Solo el admin o el propio lector pueden ver su credencial
+        if (auth()->user()->role !== 'admin' && $lectore->email !== auth()->user()->email) {
+            abort(403);
+        }
+
+        $pdf = Pdf::loadView('pdf.credencial', ['lector' => $lectore]);
+        // Formato de tarjeta (ancho 8.5cm, alto 5.4cm)
+        $pdf->setPaper([0, 0, 241.89, 153.07], 'landscape'); 
+        
+        return $pdf->download('Credencial_' . $lectore->id . '.pdf');
     }
 }
