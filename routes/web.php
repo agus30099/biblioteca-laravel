@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/libros/{libro}/editar', [LibroController::class, 'edit'])->name('libros.edit');
     Route::put('/libros/{libro}', [LibroController::class, 'update'])->name('libros.update');
     Route::delete('/libros/{libro}', [LibroController::class, 'destroy'])->name('libros.destroy');
+    Route::post('/libros/{libro}/resenar', [App\Http\Controllers\ResenaController::class, 'store'])->name('resenas.store');
 
     // --- Categorías ---
     Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
@@ -89,7 +90,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/prestamos/{prestamo}/entregar', [PrestamoController::class, 'entregar'])->name('prestamos.entregar');
 
     // --- Reservas ---
-    Route::get('/reservas', [ReservaController::class, 'index'])->name('reservas.index');
-    Route::post('/reservas', [ReservaController::class, 'store'])->name('reservas.store');
-    Route::delete('/reservas/{reserva}', [ReservaController::class, 'destroy'])->name('reservas.destroy');
+    Route::get('/reservas', [App\Http\Controllers\ReservaController::class, 'index'])->name('reservas.index');
+    Route::post('/reservas', [App\Http\Controllers\ReservaController::class, 'store'])->name('reservas.store');
+    Route::delete('/reservas/{reserva}', [App\Http\Controllers\ReservaController::class, 'destroy'])->name('reservas.destroy');
 });

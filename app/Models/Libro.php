@@ -23,9 +23,20 @@ class Libro extends Model
         return $this->hasMany(Prestamo::class);
     }
 
-    // ✅ NUEVA RELACIÓN: Un libro puede tener muchas reservas
+    // Un libro puede tener muchas reservas
     public function reservas()
     {
         return $this->hasMany(Reserva::class);
+    }
+
+    public function resenas()
+    {
+        return $this->hasMany(Resena::class);
+    }
+
+    // Un método extra para calcular el promedio fácilmente
+    public function promedioCalificacion()
+    {
+        return $this->resenas()->avg('calificacion') ?: 0;
     }
 }

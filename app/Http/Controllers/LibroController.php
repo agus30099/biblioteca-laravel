@@ -13,12 +13,31 @@ class LibroController extends Controller
     {
         $buscar = $request->get('buscar');
         
-        $libros = Libro::with(['categoria', 'autor'])
+        $libros = Libro::with(['categoria', 'autor', 'resenas'])
             ->when($buscar, function ($query, $buscar) {
                 return $query->where('titulo', 'like', "%$buscar%");
-            })->latest()->paginate(10); // <-- Cambiado a paginate(10)
-            
-        return view('libros.index', compact('libros', 'buscar'));
+            })->latest()->paginate(10);
+
+        // ✅ NUEVO: Obtener los libros que el lector ya tiene solicitados o reservados
+        $prestamosUsuario = [];
+        $reservasUsuario = [];
+
+        if (auth()->check() && auth()->user()->isLector()) {
+            $lector = \App\Models\Lector::where('email', auth()->user()->email)->first();
+            if ($lector) {
+                // Libros con préstamo activo (Solicitado, Aprobado o Prestado)
+                $prestamosUsuario = \App\Models\Prestamo::where('lector_id', $lector->id)
+                    ->whereIn('estado', ['Solicitado', 'Aprobado', 'Prestado'])
+                    ->pluck('libro_id')->toArray();
+
+                // Libros con reserva pendiente
+                $reservasUsuario = \App\Models\Reserva::where('lector_id', $lector->id)
+                    ->where('estado', 'Pendiente')
+                    ->pluck('libro_id')->toArray();
+            }
+        }
+
+        return view('libros.index', compact('libros', 'buscar', 'prestamosUsuario', 'reservasUsuario'));
     }
 
     public function create()

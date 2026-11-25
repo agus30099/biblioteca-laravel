@@ -134,6 +134,16 @@
 
                 <div class="book-create-body">
 
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form id="formLibro" action="{{ route('libros.store') }}" method="POST">
                         @csrf
 
@@ -145,16 +155,20 @@
                                        name="titulo"
                                        class="form-control"
                                        placeholder="Nombre del libro"
+                                       value="{{ old('titulo') }}"
                                        required>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Autor:</label>
-                                <input type="text"
-                                       name="autor"
-                                       class="form-control"
-                                       placeholder="Nombre del autor"
-                                       required>
+                                <select name="autor_id" class="form-select" required>
+                                    <option value="">Seleccione un autor...</option>
+                                    @foreach($autores as $autor)
+                                        <option value="{{ $autor->id }}" {{ old('autor_id') == $autor->id ? 'selected' : '' }}>
+                                            {{ $autor->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
 
                         </div>
@@ -167,6 +181,7 @@
                                        name="isbn"
                                        class="form-control"
                                        placeholder="Código ISBN"
+                                       value="{{ old('isbn') }}"
                                        required>
                                 <div class="form-text">Mínimo 5 caracteres.</div>
                             </div>
@@ -177,7 +192,7 @@
                                        name="stock"
                                        class="form-control"
                                        min="0"
-                                       value="1"
+                                       value="{{ old('stock', 1) }}"
                                        required>
                             </div>
 
@@ -187,7 +202,7 @@
                                     <option value="">Seleccione una...</option>
 
                                     @foreach($categorias as $categoria)
-                                        <option value="{{ $categoria->id }}">
+                                        <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
                                             {{ $categoria->nombre }}
                                         </option>
                                     @endforeach

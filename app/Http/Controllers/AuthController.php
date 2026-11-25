@@ -62,6 +62,6 @@ class AuthController extends Controller
         // 3. Iniciar sesión automáticamente
         \Illuminate\Support\Facades\Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success', '¡Bienvenido a la biblioteca! Tu cuenta ha sido creada.');
+        return redirect()->route('libros.index')->with('success', '¡Bienvenido a la biblioteca! Tu cuenta ha sido creada.');
     }
 }

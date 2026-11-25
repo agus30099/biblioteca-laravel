@@ -4,36 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Reserva;
 use App\Models\Lector;
+use App\Models\Prestamo;
 use Illuminate\Http\Request;
 
 class ReservaController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $estado = $request->get('estado'); // Capturamos el filtro de la URL
-
-        // Iniciamos la consulta base
-        $query = Prestamo::with(['libro', 'lector']);
-
-        // Si es lector, solo ve sus propios préstamos
-        if (auth()->user()->role == 'lector' || auth()->user()->role == 'usuario') {
-            $query->whereHas('lector', function($q) {
-                $q->where('email', auth()->user()->email);
-            });
-        }
-
-        // Aplicar el filtro si se seleccionó uno
-        if ($estado) {
-            $query->where('estado', $estado);
+        // Si es admin o bibliotecario, ve todas las reservas
+        if (auth()->user()->role == 'admin' || auth()->user()->role == 'bibliotecario') {
+            $reservas = Reserva::with(['libro', 'lector'])->latest()->get();
         } else {
-            // Si no hay filtro, ordenamos para que lo más prioritario salga primero
-            // (Solicitado y Aprobado primero, luego Prestado, luego Devuelto)
-            $query->orderByRaw("FIELD(estado, 'Solicitado', 'Aprobado', 'Prestado', 'Rechazado', 'Devuelto')");
+            // Si es lector, solo ve las suyas
+            $reservas = Reserva::with(['libro', 'lector'])
+                ->whereHas('lector', function($query) {
+                    $query->where('email', auth()->user()->email);
+                })->latest()->get();
         }
-
-        $prestamos = $query->latest()->paginate(10);
-
-        return view('prestamos.index', compact('prestamos', 'estado'));
+        return view('reservas.index', compact('reservas'));
     }
 
     public function store(Request $request)
@@ -42,20 +30,29 @@ class ReservaController extends Controller
             'libro_id' => 'required|exists:libros,id',
         ]);
 
-        // Buscar al lector por el correo del usuario logueado
         $lector = Lector::where('email', auth()->user()->email)->first();
 
         if (!$lector) {
             return back()->withErrors(['error' => 'Tu cuenta no está vinculada a un perfil de lector. Pide al bibliotecario que te registre.']);
         }
 
-        // Evitar que reserve dos veces el mismo libro
-        $existe = Reserva::where('libro_id', $request->libro_id)
+        // Verificar si ya tiene un préstamo activo de este libro
+        $prestamoPendiente = Prestamo::where('libro_id', $request->libro_id)
+            ->where('lector_id', $lector->id)
+            ->whereIn('estado', ['Solicitado', 'Aprobado', 'Prestado'])
+            ->exists();
+
+        if ($prestamoPendiente) {
+            return back()->withErrors(['error' => 'Ya tienes un préstamo o solicitud activa para este libro.']);
+        }
+
+        // Verificar si ya tiene una reserva pendiente
+        $reserva = Reserva::where('libro_id', $request->libro_id)
             ->where('lector_id', $lector->id)
             ->where('estado', 'Pendiente')
             ->exists();
 
-        if ($existe) {
+        if ($reserva) {
             return back()->withErrors(['error' => 'Ya tienes una reserva pendiente para este libro.']);
         }
 

@@ -308,7 +308,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ auth()->user()->role == 'admin' ? '9' : '7' }}">
+                                <td colspan="{{ auth()->user()->isStaff() ? '9' : '7' }}">
                                     <div class="empty-loans">
                                         <i class="bi bi-journal-x"></i>
                                         <h5>No hay préstamos registrados</h5>

@@ -173,6 +173,14 @@
     </div>
 @endif
 
+<!--Mensaje de Éxito -->
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show rounded-3">
+        <i class="bi bi-check-circle me-2"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
 <div class="catalog-header d-flex justify-content-between align-items-center flex-wrap gap-3">
 
     <div>
@@ -196,11 +204,13 @@
                     Exportar CSV
                 </a>
 
-                <a href="{{ route('libros.create') }}"
-                   class="btn btn-gold catalog-btn">
-                    <i class="bi bi-plus-circle me-1"></i>
-                    Nuevo Libro
-                </a>
+                @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('libros.create') }}"
+                       class="btn btn-gold catalog-btn">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Nuevo Libro
+                    </a>
+                @endif
 
             @endif
         @endauth
@@ -289,9 +299,22 @@
                             </td>
 
                             <td>
-                                <span class="book-title">
-                                    {{ $libro->titulo }}
-                                </span>
+                                <span class="book-title">{{ $libro->titulo }}</span>
+                                <br>
+                                <!-- ✅ NUEVO: Mostrar estrellas -->
+                                @php $promedio = round($libro->promedioCalificacion(), 1); @endphp
+                                <div class="text-warning small mt-1" title="{{ $promedio }} de 5 estrellas">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        @if($i <= $promedio)
+                                            <i class="bi bi-star-fill"></i>
+                                        @elseif($i - 0.5 <= $promedio)
+                                            <i class="bi bi-star-half"></i>
+                                        @else
+                                            <i class="bi bi-star"></i>
+                                        @endif
+                                    @endfor
+                                    <span class="text-muted ms-1">({{ $libro->resenas->count() }})</span>
+                                </div>
                             </td>
 
                             <td>
@@ -318,97 +341,108 @@
 
                                     @if(auth()->user()->isStaff())
 
-                                        <a href="{{ route('libros.edit', $libro) }}"
-                                           class="btn btn-sm btn-outline-gold"
-                                           title="Editar libro">
+                                        <!-- Botones de Staff (Admin/Bibliotecario) -->
+                                        @if(auth()->user()->role === 'admin')
+                                            <a href="{{ route('libros.edit', $libro) }}"
+                                               class="btn btn-sm btn-outline-gold"
+                                               title="Editar libro">
+                                                <i class="bi bi-pencil-square"></i> Editar
+                                            </a>
 
-                                            <i class="bi bi-pencil-square"></i>
-                                            Editar
-
-                                        </a>
-
-                                        <form action="{{ route('libros.destroy', $libro) }}"
-                                              method="POST"
-                                              class="d-inline"
-                                              onsubmit="return confirm('¿Eliminar libro?')">
-
-                                            @csrf
-                                            @method('DELETE')
-
-                                            @if(auth()->user()->role == 'admin')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                <i class="bi bi-trash"></i>
-                                                Eliminar
-                                            </button>
-                                            @endif
-
-
-                                        </form>
+                                            <form action="{{ route('libros.destroy', $libro) }}"
+                                                  method="POST"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('¿Eliminar libro?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash"></i> Eliminar
+                                                </button>
+                                            </form>
+                                        @endif
 
                                     @else
 
-                                        @if($libro->stock == 0)
-
-                                            <form action="{{ route('reservas.store') }}"
-                                                  method="POST"
-                                                  class="d-inline">
-
-                                                @csrf
-
-                                                <input type="hidden"
-                                                       name="libro_id"
-                                                       value="{{ $libro->id }}">
-
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-gold"
-                                                        onclick="return confirm('¿Reservar este libro?')">
-
-                                                    <i class="bi bi-bookmark-plus"></i>
-                                                    Reservar
-
-                                                </button>
-
-                                            </form>
-
+                                         <!-- Botones de Lector -->
+                                        @if(in_array($libro->id, $prestamosUsuario))
+                                            <!-- Si ya lo tiene solicitado o prestado -->
+                                            <span class="badge bg-primary py-2 px-3">
+                                                <i class="bi bi-hourglass-split me-1"></i> En proceso
+                                            </span>
+                                        @elseif(in_array($libro->id, $reservasUsuario))
+                                            <!-- Si ya lo tiene reservado -->
+                                            <span class="badge bg-info text-dark py-2 px-3">
+                                                <i class="bi bi-bookmark-check me-1"></i> Reservado
+                                            </span>
                                         @else
-
-                                            <form action="{{ route('prestamos.store') }}"
-                                                  method="POST"
-                                                  class="d-inline">
-
-                                                @csrf
-
-                                                <input type="hidden"
-                                                       name="libro_id"
-                                                       value="{{ $libro->id }}">
-
-                                                <input type="hidden"
-                                                       name="fecha_prestamo"
-                                                       value="{{ date('Y-m-d') }}">
-
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-catalog"
-                                                        onclick="return confirm('¿Solicitar este libro al bibliotecario?')">
-
-                                                    <i class="bi bi-hand-index"></i>
-                                                    Solicitar
-
-                                                </button>
-
-                                            </form>
-
+                                            <!-- Si no lo tiene, mostrar los botones normales -->
+                                            @if($libro->stock == 0)
+                                                <form action="{{ route('reservas.store') }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="libro_id" value="{{ $libro->id }}">
+                                                    <button type="submit" class="btn btn-sm btn-gold">
+                                                        <i class="bi bi-bookmark-plus"></i> Reservar
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <form action="{{ route('prestamos.store') }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="libro_id" value="{{ $libro->id }}">
+                                                    <input type="hidden" name="fecha_prestamo" value="{{ date('Y-m-d') }}">
+                                                    <button type="submit" class="btn btn-sm btn-catalog">
+                                                        <i class="bi bi-hand-index"></i> Solicitar
+                                                    </button>
+                                                </form>
+                                            @endif
                                         @endif
+
+                                        <!-- Botón de Calificar -->
+                                        <button type="button" class="btn btn-sm btn-outline-warning mt-1" data-bs-toggle="modal" data-bs-target="#modalResena{{ $libro->id }}" title="Calificar libro">
+                                            <i class="bi bi-star"></i> Calificar
+                                        </button>
+
+                                        <!-- Modal de Calificación -->
+                                        <div class="modal fade" id="modalResena{{ $libro->id }}" tabindex="-1">
+                                            <div class="modal-dialog text-start">
+                                                <div class="modal-content">
+                                                    <form action="{{ route('resenas.store', $libro) }}" method="POST">
+                                                        @csrf
+                                                        <div class="modal-header bg-warning text-dark">
+                                                            <h5 class="modal-title">Calificar: {{ $libro->titulo }}</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label class="form-label text-dark">Calificación:</label>
+                                                                <select name="calificacion" class="form-select" required>
+                                                                    <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                                                                    <option value="4">⭐⭐⭐⭐ Muy bueno</option>
+                                                                    <option value="3">⭐⭐⭐ Bueno</option>
+                                                                    <option value="2">⭐⭐ Regular</option>
+                                                                    <option value="1">⭐ Malo</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label text-dark">Comentario (opcional):</label>
+                                                                <textarea name="comentario" class="form-control" rows="3" placeholder="¿Qué te pareció el libro?"></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                            <button type="submit" class="btn btn-warning">Enviar Calificación</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
 
                                     @endif
 
                                 @else
 
-                                    <a href="{{ route('login') }}"
-                                       class="btn btn-sm btn-outline-gold">
-
-                                        <i class="bi bi-box-arrow-in-right"></i>
-                                        Inicia sesión
-
+                                    <!-- Si es invitado (No logueado) -->
+                                    <a href="{{ route('login') }}" class="btn btn-sm btn-outline-gold">
+                                        <i class="bi bi-box-arrow-in-right"></i> Inicia sesión
                                     </a>
 
                                 @endauth

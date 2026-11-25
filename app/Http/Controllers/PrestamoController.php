@@ -10,19 +10,30 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class PrestamoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Si es admin, ve todos los préstamos
-        if (auth()->user()->role == 'admin') {
-            $prestamos = Prestamo::with(['libro', 'lector'])->latest()->paginate(10);
-        } else {
-            // Si es lector, solo ve los préstamos vinculados a su correo
-            $prestamos = Prestamo::with(['libro', 'lector'])
-                ->whereHas('lector', function($query) {
-                    $query->where('email', auth()->user()->email);
-                })->latest()->paginate(10);
+        $estado = $request->query('estado');
+        $estadosPermitidos = ['Solicitado', 'Aprobado', 'Prestado', 'Devuelto'];
+
+        if ($estado !== null && !in_array($estado, $estadosPermitidos, true)) {
+            abort(400, 'El filtro de estado no es válido.');
         }
-        return view('prestamos.index', compact('prestamos'));
+
+        $query = Prestamo::with(['libro', 'lector']);
+
+        if (auth()->user()->role !== 'admin') {
+            $query->whereHas('lector', function ($query) {
+                $query->where('email', auth()->user()->email);
+            });
+        }
+
+        if ($estado !== null) {
+            $query->where('estado', $estado);
+        }
+
+        $prestamos = $query->latest()->paginate(10)->withQueryString();
+
+        return view('prestamos.index', compact('prestamos', 'estado'));
     }
 
     public function create()
